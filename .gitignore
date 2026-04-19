@@ -1,0 +1,9 @@
+.build/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/
+DerivedData/
+.DS_Store
+*.o
+*.d
+Packages/

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Murmur Updates</title>
+    <link>https://nftscammer.github.io/Murmur/appcast.xml</link>
+    <description>Most recent changes with links to updates.</description>
+    <language>en</language>
+
+    <item>
+      <title>Version 1.0</title>
+      <pubDate>Sat, 19 Apr 2025 00:00:00 +0000</pubDate>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <h3>Initial release</h3>
+        <ul>
+          <li>Global hotkey dictation (⌥Space)</li>
+          <li>Live partial text injection</li>
+          <li>Apple + Whisper backends</li>
+          <li>Blind A/B testing mode</li>
+        </ul>
+      ]]></description>
+      <enclosure
+        url="https://nftscammer.github.io/Murmur/releases/Murmur-1.0.dmg"
+        sparkle:edSignature="REPLACE_WITH_SIGNATURE_FROM_sign_update"
+        length="REPLACE_WITH_FILE_SIZE_IN_BYTES"
+        type="application/octet-stream"/>
+    </item>
+
+  </channel>
+</rss>
