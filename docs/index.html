@@ -1,14 +1,468 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Murmur</title>
-<style>body{font-family:-apple-system,sans-serif;max-width:600px;margin:80px auto;padding:0 20px;background:#0d0d14;color:#eee}
-h1{font-size:2.5em;background:linear-gradient(135deg,#4a9eff,#00d4f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-p{color:#aaa;line-height:1.6}a{color:#4a9eff}</style>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Murmur — Native macOS Dictation</title>
+<meta name="description" content="Murmur is a native macOS dictation app that types as you speak — instantly, system-wide, with no subscription required.">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Murmur — Native macOS Dictation">
+<meta property="og:description" content="Speak. It types. System-wide dictation for macOS with live word-by-word injection.">
+<meta property="og:type" content="website">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080810;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);
+  --text:#f0f0f5;--muted:#8e8ea0;--accent:#3b82f6;--accent2:#06b6d4;--green:#34d399;
+  --radius:18px;--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:56px;background:rgba(8,8,16,0.72);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:600;letter-spacing:-0.3px;text-decoration:none;color:var(--text)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--accent);color:#fff;border-radius:980px;padding:7px 18px;font-size:14px;font-weight:600;text-decoration:none;transition:opacity .2s}
+.nav-cta:hover{opacity:.85}
+@media(max-width:680px){.nav-links{display:none}}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
+.hero-glow{position:absolute;top:10%;left:50%;transform:translateX(-50%);width:800px;height:500px;border-radius:50%;background:radial-gradient(ellipse,rgba(59,130,246,.12) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:980px;padding:5px 14px;font-size:13px;color:#93c5fd;margin-bottom:28px}
+.hero-badge span{width:6px;height:6px;background:#3b82f6;border-radius:50%;animation:pulse 2s infinite;display:inline-block}
+h1{font-size:clamp(56px,9vw,100px);font-weight:700;letter-spacing:-4px;line-height:1;background:linear-gradient(135deg,#fff 0%,#a5b4fc 55%,#38bdf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:24px}
+.hero-sub{font-size:clamp(18px,2.5vw,22px);color:var(--muted);max-width:520px;margin-bottom:48px;line-height:1.5}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;text-decoration:none;border-radius:980px;padding:14px 30px;font-size:16px;font-weight:600;transition:transform .2s,box-shadow .2s;box-shadow:0 0 40px rgba(59,130,246,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 50px rgba(59,130,246,.5)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:var(--surface);color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:980px;padding:14px 30px;font-size:16px;font-weight:500;transition:background .2s}
+.btn-secondary:hover{background:rgba(255,255,255,.08)}
+.hero-meta{margin-top:20px;color:var(--muted);font-size:13px}
+.waveform-hero{display:flex;align-items:center;justify-content:center;gap:4px;height:80px;margin:48px 0 32px}
+.waveform-hero .bar{width:4px;border-radius:2px;background:linear-gradient(to top,var(--accent),var(--accent2));animation:wave 1.4s ease-in-out infinite;opacity:.9}
+.waveform-hero .bar:nth-child(1){height:20px;animation-delay:0s}
+.waveform-hero .bar:nth-child(2){height:35px;animation-delay:.1s}
+.waveform-hero .bar:nth-child(3){height:55px;animation-delay:.2s}
+.waveform-hero .bar:nth-child(4){height:70px;animation-delay:.3s}
+.waveform-hero .bar:nth-child(5){height:50px;animation-delay:.4s}
+.waveform-hero .bar:nth-child(6){height:78px;animation-delay:.5s}
+.waveform-hero .bar:nth-child(7){height:50px;animation-delay:.6s}
+.waveform-hero .bar:nth-child(8){height:70px;animation-delay:.5s}
+.waveform-hero .bar:nth-child(9){height:55px;animation-delay:.4s}
+.waveform-hero .bar:nth-child(10){height:35px;animation-delay:.3s}
+.waveform-hero .bar:nth-child(11){height:20px;animation-delay:.2s}
+@keyframes wave{0%,100%{transform:scaleY(.4);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.mockup-wrap{width:100%;max-width:340px;background:rgba(18,18,30,.97);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 40px 100px rgba(0,0,0,.6);overflow:hidden;margin:0 auto}
+.mockup-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border)}
+.mockup-header-left{display:flex;align-items:center;gap:8px}
+.mockup-title{font-size:14px;font-weight:600}
+.mockup-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green)}
+.mockup-badge-dot{width:6px;height:6px;background:var(--green);border-radius:50%}
+.mockup-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px}
+.mockup-row-left{display:flex;align-items:center;gap:10px}
+.mockup-row-label{font-size:13px;color:var(--text)}
+.mockup-toggle{width:32px;height:18px;background:var(--accent);border-radius:9px;position:relative;flex-shrink:0}
+.mockup-toggle::after{content:'';position:absolute;top:2px;right:2px;width:14px;height:14px;background:#fff;border-radius:50%}
+.mockup-divider{height:1px;background:var(--border);margin:0 16px}
+.kbd{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:5px;padding:1px 6px;font-size:11px;color:var(--muted)}
+.mockup-footer{display:flex;border-top:1px solid var(--border)}
+.mockup-footer-btn{flex:1;padding:9px 0;text-align:center;font-size:11px;color:var(--muted);border-right:1px solid var(--border)}
+.mockup-footer-btn:last-child{border-right:none}
+section{padding:100px 24px;max-width:1100px;margin:0 auto}
+.section-label{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.section-title{font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
+.section-sub{font-size:18px;color:var(--muted);max-width:560px;line-height:1.6}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:64px}
+.feature-card{background:var(--bg);padding:36px 32px;transition:background .2s}
+.feature-card:hover{background:rgba(255,255,255,.025)}
+.feature-icon{width:44px;height:44px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:20px}
+.feature-card h3{font-size:18px;font-weight:600;margin-bottom:8px;letter-spacing:-.3px}
+.feature-card p{font-size:15px;color:var(--muted);line-height:1.6}
+.how-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:64px}
+@media(max-width:768px){.how-wrap{grid-template-columns:1fr}}
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:20px;padding:24px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{width:32px;height:32px;flex-shrink:0;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);margin-top:2px}
+.step-content h4{font-size:16px;font-weight:600;margin-bottom:4px}
+.step-content p{font-size:14px;color:var(--muted);line-height:1.6}
+.backends-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+@media(max-width:700px){.backends-grid{grid-template-columns:1fr}}
+.backend-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;transition:border-color .2s,transform .2s}
+.backend-card:hover{border-color:rgba(59,130,246,.4);transform:translateY(-2px)}
+.backend-card.featured{border-color:rgba(59,130,246,.35);background:rgba(59,130,246,.06)}
+.backend-name{font-size:16px;font-weight:700;margin-bottom:6px;letter-spacing:-.3px}
+.backend-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:980px;margin-bottom:14px}
+.tag-green{background:rgba(52,211,153,.15);color:var(--green)}
+.tag-blue{background:rgba(59,130,246,.15);color:#93c5fd}
+.tag-purple{background:rgba(167,139,250,.15);color:#c4b5fd}
+.backend-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.privacy-wrap{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:64px}
+@media(max-width:700px){.privacy-wrap{grid-template-columns:1fr}}
+.privacy-item{display:flex;gap:16px}
+.privacy-check{width:24px;height:24px;background:rgba(52,211,153,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:12px;color:var(--green)}
+.privacy-item h4{font-size:16px;font-weight:600;margin-bottom:4px}
+.privacy-item p{font-size:14px;color:var(--muted);line-height:1.6}
+.req-grid{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px}
+.req-pill{background:var(--surface);border:1px solid var(--border);border-radius:980px;padding:8px 18px;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.req-pill strong{color:var(--text)}
+.changelog{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:48px}
+.changelog-item{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;gap:20px;align-items:flex-start}
+.changelog-item:last-child{border-bottom:none}
+.changelog-version{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap}
+.changelog-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.changelog-notes{font-size:14px;line-height:1.7;flex:1}
+.changelog-notes li{margin-left:18px;margin-bottom:4px;color:var(--muted)}
+.changelog-notes li strong{color:var(--text)}
+.download-section{text-align:center;padding:120px 24px;position:relative;overflow:hidden}
+.download-section::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(59,130,246,.08) 0%,transparent 70%);pointer-events:none}
+.download-section h2{font-size:clamp(36px,6vw,64px);font-weight:700;letter-spacing:-2px;margin-bottom:16px}
+.download-section > p{color:var(--muted);font-size:18px;margin-bottom:40px}
+footer{border-top:1px solid var(--border);padding:40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+footer p{font-size:13px;color:var(--muted)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--muted);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.full-divider{height:1px;background:var(--border)}
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:none}
+</style>
 </head>
 <body>
-<h1>Murmur</h1>
-<p>Native macOS dictation — fast, accurate, system-wide.</p>
-<p>Global hotkey · Live partial text injection · Apple + Whisper backends · Blind A/B testing</p>
-<p><a href="releases/">Download latest release</a></p>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="#0d1b35"/>
+      <rect x="4"    y="14" width="2.5" height="6"  rx="1.25" fill="url(#wg)" opacity="0.55"/>
+      <rect x="7.5"  y="11" width="2.5" height="10" rx="1.25" fill="url(#wg)" opacity="0.7"/>
+      <rect x="11"   y="8"  width="2.5" height="16" rx="1.25" fill="url(#wg)"/>
+      <rect x="14.5" y="5"  width="2.5" height="22" rx="1.25" fill="url(#wg)"/>
+      <rect x="18"   y="8"  width="2.5" height="16" rx="1.25" fill="url(#wg)"/>
+      <rect x="21.5" y="11" width="2.5" height="10" rx="1.25" fill="url(#wg)" opacity="0.7"/>
+      <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+    </svg>
+    Murmur
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+    <li><a href="#changelog">Changelog</a></li>
+  </ul>
+  <a class="nav-cta" href="releases/Murmur-1.0.dmg">Download</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge"><span></span>&nbsp;Version 1.0 &mdash; Available now for macOS 14+</div>
+  <h1>Speak.<br>It types.</h1>
+  <p class="hero-sub">Murmur is a native macOS dictation app that lives in your menu bar and types what you say &mdash; instantly, anywhere on your Mac.</p>
+  <div class="waveform-hero">
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  </div>
+  <div class="hero-actions">
+    <a class="btn-primary" href="releases/Murmur-1.0.dmg">
+      <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M8 1v9M4 7l4 4 4-4M2 13h12" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Download free
+    </a>
+    <a class="btn-secondary" href="#how-it-works">How it works &rarr;</a>
+  </div>
+  <p class="hero-meta">macOS 14 Sonoma or later &middot; Apple Silicon &amp; Intel &middot; Free</p>
+</div>
+
+<div class="full-divider"></div>
+
+<section style="text-align:center;padding-top:80px;padding-bottom:80px">
+  <p class="section-label">The interface</p>
+  <h2 class="section-title">Everything in one click</h2>
+  <p class="section-sub" style="margin:0 auto 48px">Click the menu bar icon &mdash; your settings, hotkey recorder, and recent transcriptions are all right there. No windows to hunt for.</p>
+  <div class="mockup-wrap fade-in">
+    <div class="mockup-header">
+      <div class="mockup-header-left">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect width="22" height="22" rx="5" fill="#0d1b35"/>
+          <rect x="3"  y="11" width="2" height="4"  rx="1" fill="#60a5fa" opacity="0.55"/>
+          <rect x="6"  y="9"  width="2" height="8"  rx="1" fill="#60a5fa" opacity="0.75"/>
+          <rect x="9"  y="6"  width="2" height="14" rx="1" fill="#60a5fa"/>
+          <rect x="12" y="4"  width="2" height="18" rx="1" fill="#38bdf8"/>
+          <rect x="15" y="6"  width="2" height="14" rx="1" fill="#60a5fa"/>
+          <rect x="18" y="9"  width="2" height="8"  rx="1" fill="#60a5fa" opacity="0.75"/>
+        </svg>
+        <span class="mockup-title">Murmur</span>
+      </div>
+      <div class="mockup-badge"><div class="mockup-badge-dot"></div>&nbsp;A/B</div>
+    </div>
+    <div class="mockup-row" style="padding:12px 16px;background:rgba(59,130,246,.06);border-bottom:1px solid var(--border)">
+      <div class="mockup-row-left">
+        <span style="font-size:15px">🎙</span>
+        <span class="mockup-row-label" style="font-weight:600">Start Dictation</span>
+      </div>
+      <div style="display:flex;gap:3px"><span class="kbd">⌥</span><span class="kbd">Space</span></div>
+    </div>
+    <div class="mockup-divider"></div>
+    <div class="mockup-row">
+      <div class="mockup-row-left"><span style="font-size:14px;color:var(--accent);width:20px;text-align:center">⇄</span><span class="mockup-row-label">Blind A/B Mode</span></div>
+      <div class="mockup-toggle"></div>
+    </div>
+    <div class="mockup-row">
+      <div class="mockup-row-left"><span style="font-size:14px;color:var(--accent);width:20px;text-align:center">⌨</span><span class="mockup-row-label">Hotkey</span></div>
+      <div style="display:flex;gap:3px"><span class="kbd">⌥</span><span class="kbd">Space</span></div>
+    </div>
+    <div class="mockup-row">
+      <div class="mockup-row-left"><span style="font-size:14px;color:var(--accent);width:20px;text-align:center">👆</span><span class="mockup-row-label">Trigger</span></div>
+      <span style="font-size:13px;color:var(--text)">Toggle &#9660;</span>
+    </div>
+    <div class="mockup-divider"></div>
+    <div style="padding:8px 16px 12px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Recent</div>
+      <div style="font-size:12px;color:var(--text);padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>Send the report by end of day&hellip;</span><span style="color:var(--muted)">&#10064;</span></div>
+      <div style="font-size:12px;color:var(--text);padding:5px 0;display:flex;justify-content:space-between"><span>Schedule a call for Thursday&hellip;</span><span style="color:var(--muted)">&#10064;</span></div>
+    </div>
+    <div class="mockup-footer">
+      <div class="mockup-footer-btn">&#9881; Settings</div>
+      <div class="mockup-footer-btn">&#8593; Updates</div>
+      <div class="mockup-footer-btn">&#9211; Quit</div>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<section id="features" class="fade-in">
+  <p class="section-label">Features</p>
+  <h2 class="section-title">Built different.</h2>
+  <p class="section-sub">Not a subscription. Not a cloud service. A proper Mac app that respects how you work.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#9889;</div>
+      <h3>Live word injection</h3>
+      <p>Words appear as you speak &mdash; not after you stop. Murmur streams partial results directly into the focused app, replacing previous partials in real time.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127757;</div>
+      <h3>Works everywhere</h3>
+      <p>System-wide Accessibility API injection means Murmur types into any text field on your Mac &mdash; browsers, editors, Slack, Notes, Terminal, anything at all.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#8997;</div>
+      <h3>Global hotkey</h3>
+      <p>Press &#8997;Space to start, press again to stop. Or hold to record and release to transcribe. Set any key combo you like from inside the popover.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127899;</div>
+      <h3>Three backends</h3>
+      <p>Apple&rsquo;s on-device recogniser for instant speed. Whisper (WhisperKit) for higher accuracy. Hybrid for the best of both: live Apple streaming, final Whisper pass.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128256;</div>
+      <h3>Blind A/B testing</h3>
+      <p>Enable A/B mode and Murmur randomly picks a backend each session. Rate each result and review cumulative stats to decide which engine suits your voice best.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128274;</div>
+      <h3>Private by design</h3>
+      <p>No account. No cloud sync. No telemetry. Audio never leaves your device. Sessions are stored in a local SQLite database and can be deleted any time.</p>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<section id="how-it-works">
+  <p class="section-label">How it works</p>
+  <h2 class="section-title">From voice to text<br>in milliseconds.</h2>
+  <div class="how-wrap">
+    <div class="steps fade-in">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Press &#8997;Space anywhere</h4>
+          <p>The global hotkey fires from any app. A subtle HUD appears at the bottom of your screen with a live waveform so you know it&rsquo;s listening.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Your mic is tapped at 16&nbsp;kHz</h4>
+          <p>Murmur captures audio via AVAudioEngine, downsamples it to 16&nbsp;kHz mono Float32 &mdash; the exact format both Apple Speech and Whisper expect.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Words stream as you speak</h4>
+          <p>Apple&rsquo;s SFSpeechRecognizer fires partial results every few hundred milliseconds. Each update is injected live via the Accessibility API, replacing the previous draft.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Final accuracy pass</h4>
+          <p>When you stop, Whisper processes the full audio buffer with Core ML acceleration. Its final transcript replaces the live partial &mdash; speed and accuracy together.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>Session logged locally</h4>
+          <p>Duration, word count, latency, and transcript are saved to a local SQLite database. In A/B mode you can rate each result to build your own comparison dataset.</p>
+        </div>
+      </div>
+    </div>
+    <div class="fade-in" style="display:flex;flex-direction:column;gap:16px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Live injection</div>
+        <div style="font-family:monospace;font-size:14px;line-height:2.2">
+          <span style="color:var(--muted)">Hey can you </span><span style="color:var(--accent);background:rgba(59,130,246,.1);padding:1px 4px;border-radius:3px">schedule a meeting<span style="animation:blink 1s infinite;display:inline-block">|</span></span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:12px">Words appear as you speak, replaced in real time</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;text-transform:uppercase;letter-spacing:.5px">Session log</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">Backend</span><span>Apple</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">First word</span><span style="color:var(--green)">~120&nbsp;ms</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">Words</span><span>14</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">Your rating</span><span>&#128077;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<section class="fade-in">
+  <p class="section-label">Engines</p>
+  <h2 class="section-title">Three backends.<br>You choose.</h2>
+  <p class="section-sub">Each backend makes a different accuracy/speed tradeoff. Use A/B mode to find which one suits your voice.</p>
+  <div class="backends-grid">
+    <div class="backend-card">
+      <div class="backend-name">Apple</div>
+      <span class="backend-tag tag-green">Fastest</span>
+      <p class="backend-desc">Uses Apple&rsquo;s built-in SFSpeechRecognizer. Partial results stream in real time. Runs fully on-device on Apple Silicon with near-zero latency to first word.</p>
+    </div>
+    <div class="backend-card featured">
+      <div class="backend-name">Hybrid</div>
+      <span class="backend-tag tag-blue">Recommended</span>
+      <p class="backend-desc">Apple streams live words while you speak. When you stop, Whisper does a full-accuracy pass and replaces the draft. Best of both worlds for most people.</p>
+    </div>
+    <div class="backend-card">
+      <div class="backend-name">Whisper</div>
+      <span class="backend-tag tag-purple">Most accurate</span>
+      <p class="backend-desc">OpenAI&rsquo;s Whisper base.en model via WhisperKit, accelerated by Core ML. Slower to first word but significantly better accuracy for longer or complex speech.</p>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<section id="privacy" class="fade-in">
+  <p class="section-label">Privacy</p>
+  <h2 class="section-title">Your voice stays<br>on your Mac.</h2>
+  <p class="section-sub">Murmur was built with a simple rule: nothing leaves your device without your knowledge.</p>
+  <div class="privacy-wrap">
+    <div class="privacy-item">
+      <div class="privacy-check">&#10003;</div>
+      <div><h4>No audio uploads</h4><p>Audio is processed entirely on-device &mdash; by Apple&rsquo;s framework or by Whisper via Core ML. It is never sent to any external server.</p></div>
+    </div>
+    <div class="privacy-item">
+      <div class="privacy-check">&#10003;</div>
+      <div><h4>No account required</h4><p>Download, install, use. No email, no sign-up, no login. The app functions entirely offline after the optional Whisper model download.</p></div>
+    </div>
+    <div class="privacy-item">
+      <div class="privacy-check">&#10003;</div>
+      <div><h4>No telemetry</h4><p>Zero analytics, no crash reporting, no usage tracking of any kind. The app has no mechanism to contact any external server.</p></div>
+    </div>
+    <div class="privacy-item">
+      <div class="privacy-check">&#10003;</div>
+      <div><h4>Local storage only</h4><p>Session logs live in <code style="background:var(--surface);padding:1px 5px;border-radius:4px;font-size:13px">~/Library/Application Support/Murmur/</code> on your machine. Delete the folder to erase all history.</p></div>
+    </div>
+    <div class="privacy-item">
+      <div class="privacy-check">&#10003;</div>
+      <div><h4>Open source</h4><p>The full source code is publicly available to inspect. Every claim on this page can be verified by reading the code.</p></div>
+    </div>
+    <div class="privacy-item">
+      <div class="privacy-check">&#10003;</div>
+      <div><h4>Transparent mic access</h4><p>Murmur requests microphone permission only on first use. macOS shows the orange dot in the menu bar whenever the mic is active.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<section class="fade-in">
+  <p class="section-label">Requirements</p>
+  <h2 class="section-title">What you need</h2>
+  <div class="req-grid">
+    <div class="req-pill">&#127822; <strong>macOS 14</strong>&nbsp;Sonoma or later</div>
+    <div class="req-pill">&#128187; <strong>Apple Silicon</strong>&nbsp;or Intel Mac</div>
+    <div class="req-pill">&#127897; <strong>Microphone</strong>&nbsp;built-in or USB</div>
+    <div class="req-pill">&#9855; <strong>Accessibility</strong>&nbsp;permission</div>
+    <div class="req-pill">&#128172; <strong>Speech Recognition</strong>&nbsp;permission</div>
+    <div class="req-pill">&#128190; <strong>~200&nbsp;MB</strong>&nbsp;with Whisper model</div>
+  </div>
+  <p style="margin-top:24px;font-size:14px;color:var(--muted)">The Whisper model (~140&nbsp;MB) downloads on first use. You can use the Apple-only backend immediately with no extra download.</p>
+</section>
+
+<div class="full-divider"></div>
+
+<section id="changelog" class="fade-in">
+  <p class="section-label">Changelog</p>
+  <h2 class="section-title">Release history</h2>
+  <div class="changelog">
+    <div class="changelog-item">
+      <div style="flex-shrink:0">
+        <div class="changelog-version">v1.0</div>
+        <div class="changelog-meta">April 2025 &mdash; Initial release</div>
+      </div>
+      <ul class="changelog-notes">
+        <li><strong>Live partial injection</strong> &mdash; words appear as you speak via streaming SFSpeechRecognizer, replacing previous partials in real time</li>
+        <li><strong>Three backends</strong> &mdash; Apple, Whisper (WhisperKit base.en with Core ML), and Hybrid mode</li>
+        <li><strong>Global hotkey</strong> &mdash; &#8997;Space default, fully customisable inline, toggle or hold-to-record modes</li>
+        <li><strong>Blind A/B testing</strong> &mdash; random backend selection with per-session thumbs rating and cumulative stats view</li>
+        <li><strong>Menu bar popover</strong> &mdash; all controls inline including hotkey recorder; no separate windows</li>
+        <li><strong>Session history</strong> &mdash; local SQLite log, CSV export from the Stats tab</li>
+        <li><strong>Automatic updates</strong> &mdash; Sparkle with EdDSA-signed releases</li>
+        <li><strong>Custom icon</strong> &mdash; animated waveform, dark navy with blue-to-cyan gradient</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="download-section fade-in">
+  <h2>Ready to talk?</h2>
+  <p>Free to download. No account. No subscription.</p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="releases/Murmur-1.0.dmg">
+      <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M8 1v9M4 7l4 4 4-4M2 13h12" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Download Murmur 1.0
+    </a>
+  </div>
+  <p style="margin-top:16px;font-size:13px;color:var(--muted)">macOS 14 Sonoma or later &middot; Apple Silicon &amp; Intel &middot; Free</p>
+</div>
+
+<footer>
+  <p>&copy; 2025 Murmur. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="#privacy">Privacy</a>
+    <a href="#changelog">Changelog</a>
+    <a href="appcast.xml">Appcast</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('visible'); });
+  },{threshold:0.08});
+  document.querySelectorAll('.fade-in').forEach(function(el){ io.observe(el); });
+})();
+</script>
 </body>
 </html>
